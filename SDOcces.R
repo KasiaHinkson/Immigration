@@ -121,6 +121,16 @@ CCES14$imminc<-CCES14$Factor2
 CCES14$Factor1<-NULL
 CCES14$Factor2<-NULL
 
+yimm<-cbind(UMS324,UMS326,UMS327,UMS328,UMS329)
+yimmfactor<-factanal(na.omit(yimm),factors=1,scores="regression")
+yimmfactor
+cronbach(yimm)
+fsy<-factor.scores(yimm,yimmfactor)
+fsy<-fsy$scores
+CCES14<-cbind(CCES14,fsy)
+CCES14$resent<-CCES14$Factor1
+CCES14$Factor1<-NULL
+
 #factor analysis: authoritarianism
 Y2<-cbind(UMS330,UMS331,UMS332,UMS333)
 authfactor<-factanal(na.omit(Y2),factors=1,scores="regression")
@@ -134,54 +144,78 @@ CCES14$Factor1<-NULL
 
 
 #models
-model<-lm(immass~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
+model<-lm(resent~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
 summary(model)
 p1 <- plot_model(model,type="int") +
-  ggtitle("Assimilation") +
+  ggtitle("Immigrant Resentment") +
   scale_y_continuous(limits = c(-2, 2))
+p1
 
 model1<-lm(imminc~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
 summary(model1)
 p2 <- plot_model(model1,type="int") +
   ggtitle("Incorporation") +
   scale_y_continuous(limits = c(-2, 2))
+p2
 
-#alternate DP
-CCES14$CC14_322_1<-recode(CCES14$CC14_322_1, "8=NA")
-CCES14$CC14_322_1<-recode(CCES14$CC14_322_1, "9=NA")
-CCES14$CC14_322_1<-recode(CCES14$CC14_322_1, "2=0")
-model1<-glm(CC14_322_1~SDO+RWA+SDO*RWA+male+partyid+white+black+hisp+UMS336+UMS340, data=CCES14, family=binomial)
-summary(model1)
-plot_model(model1,type="int")
 
-#alternate DP - increase border patrol
-CCES14$CC14_322_2<-recode(CCES14$CC14_322_2, "8=NA")
-CCES14$CC14_322_2<-recode(CCES14$CC14_322_2, "9=NA")
-CCES14$CC14_322_2<-recode(CCES14$CC14_322_2, "2=0")
-model2<-glm(CC14_322_2~SDO+RWA+SDO*RWA+male+partyid+white+black+hisp, data=CCES14, family=binomial)
-summary(model2)
-plot_model(model2,type="int")
+coplot(immass~SDO|auth1, panel=panel.car, col="red", rows=1, data=CCES14)
+coplot(immass~auth1|SDO, panel=panel.car, col="red", rows=1, data=CCES14)
+coplot(imminc~auth1|SDO, panel=panel.car, col="red", rows=1, data=CCES14)
+coplot(imminc~SDO|auth1, panel=panel.car, col="red", rows=1, data=CCES14)
 
-#alternate DP - allow police to question anyone they think is here illegally
-CCES14$CC14_322_3<-recode(CCES14$CC14_322_3, "8=NA")
-CCES14$CC14_322_3<-recode(CCES14$CC14_322_3, "9=NA")
-CCES14$CC14_322_3<-recode(CCES14$CC14_322_3, "2=0")
-model3<-glm(CC14_322_3~SDO+RWA+SDO*RWA+male+partyid+white+black+hisp, data=CCES14, family=binomial)
+#alternate DP - immigrants policies
+CCES14$UMS372<-recode(CCES14$UMS372, "998=NA")
+CCES14$UMS372<-recode(CCES14$UMS372, "997=NA")
+CCES14$UMS372<-recode(CCES14$UMS372, "999=NA")
+CCES14$UMS373<-recode(CCES14$UMS373, "998=NA")
+CCES14$UMS373<-recode(CCES14$UMS373, "997=NA")
+CCES14$UMS373<-recode(CCES14$UMS373, "999=NA")
+CCES14$UMS374<-recode(CCES14$UMS374, "998=NA")
+CCES14$UMS374<-recode(CCES14$UMS374, "997=NA")
+CCES14$UMS374<-recode(CCES14$UMS374, "999=NA")
+CCES14$UMS374<-100-CCES14$UMS374
+CCES14$UMS375<-recode(CCES14$UMS375, "998=NA")
+CCES14$UMS375<-recode(CCES14$UMS375, "997=NA")
+CCES14$UMS375<-recode(CCES14$UMS375, "999=NA")
+
+Y3<-cbind(UMS372,UMS373,UMS375)
+statusfactor<-factanal(na.omit(Y3),factors=1,scores="regression")
+statusfactor
+cronbach(Y3)
+fs3<-factor.scores(Y3,statusfactor)
+fs3<-fs3$scores
+CCES14<-cbind(CCES14,fs3)
+CCES14$status<-CCES14$Factor1
+CCES14$Factor1<-NULL
+
+model3<-lm(status~SDO+auth1+SDO*auth1+male+partyid+black+hisp+UMS312, data=CCES14)
 summary(model3)
 plot_model(model3,type="int")
 
-#alternate DP - fine businesses that hire illegal immigrants
-CCES14$CC14_322_4<-recode(CCES14$CC14_322_4, "8=NA")
-CCES14$CC14_322_4<-recode(CCES14$CC14_322_4, "9=NA")
-CCES14$CC14_322_4<-recode(CCES14$CC14_322_4, "2=0")
-model4<-glm(CC14_322_4~SDO+RWA+SDO*RWA+male+partyid+white+black+hisp, data=CCES14, family=binomial)
+
+#alternate DP - feelings towards immigrants
+CCES14$UMS311 #irish immigrants
+model2<-lm(UMS311~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
+summary(model2)
+plot_model(model2,type="int")
+
+CCES14$UMS312 #illegal immigrants
+model3<-lm(UMS312~SDO+auth1+auth1*SDO+male+partyid+black+hisp, data=CCES14)
+summary(model3)
+plot_model(model3,type="int")
+
+CCES14$UMS313 #african immigrants
+model4<-lm(UMS313~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
 summary(model4)
 plot_model(model4,type="int")
 
-#alternate DP - deport
-CCES14$CC14_322_5<-recode(CCES14$CC14_322_5, "8=NA")
-CCES14$CC14_322_5<-recode(CCES14$CC14_322_5, "9=NA")
-CCES14$CC14_322_5<-recode(CCES14$CC14_322_5, "2=0")
-model5<-glm(CC14_322_5~SDO+RWA+SDO*RWA+male+partyid+white+black+hisp, data=CCES14, family=binomial)
+CCES14$UMS314 #chinese immigrants
+model5<-lm(UMS314~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
 summary(model5)
 plot_model(model5,type="int")
+
+CCES14$UMS315 #mexican immigrants
+model6<-lm(UMS315~SDO+auth1+SDO*auth1+male+partyid+black+hisp, data=CCES14)
+summary(model6)
+plot_model(model6,type="int")
